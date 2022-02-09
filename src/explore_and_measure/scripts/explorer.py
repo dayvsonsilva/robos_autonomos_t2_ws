@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import cmath
+import plotly.express as px
 
 
 class Explorer:
@@ -31,38 +32,38 @@ class Explorer:
             "/front/scan", LaserScan, self.laserCallback, queue_size=10
         )
 
-    def pol_cart(self, raio, theta):
-        # theta = math.degrees(theta)
-        # theta = theta * (180 / math.pi)
-        x = raio * np.cos(theta)  # * 1000
-        y = raio * np.sin(theta)  # * 1000
-        # x, y = cmath.polar(raio, theta)
-        return (round(x), round(y))
-
     def timerCallback(self, event):
+        rospy.loginfo("Timer callback")
         # msg = Twist()
         # msg.angular.z = 0.1
         # msg.linear.x = 0.2
         # self.vel_pub.publish(msg)
-        plt.scatter(self.points[:, 0], self.points[:, 1], c="r")
-        plt.show()
+        # plt.scatter(self.points[:, 0], self.points[:, 1], c="r")
+        # plt.show()
+        # fig = px.scatter(x=self.points[:, 0], y=self.points[:, 1])
+        # fig.show()
 
     def laserCallback(self, msg):
+        rospy.loginfo("Laser callback")
         # rospy.loginfo("Resposta laser: " + str(msg.angle_increment))
         self.laser = msg.ranges
-        self.angle_step = msg.angle_increment
+        self.angle_step = math.degrees(msg.angle_increment) / 57.2958
+        self.angle_start = math.degrees(msg.angle_min)
+        self.angle_stop = math.degrees(msg.angle_max)
         # rospy.loginfo("Laser len:" + str(len(self.laser)))
         self.points = np.zeros([1, 2])
+        angulo = self.angle_start
+
         for i in range(len(self.laser)):
-            self.point = np.array([self.pol_cart(self.laser[i], self.angle_step * i)])
-
-            rospy.loginfo("ponto:" + str(self.point))
-            # self.points = np.append(self.points, self.point, axis=1)
-            rospy.loginfo("pontos:" + str(self.points))
+            self.point = np.array(
+                [[(cmath.rect(self.laser[i], angulo).real), (cmath.rect(self.laser[i], angulo).imag)]])  # x e y
+            angulo = angulo + self.angle_step  # self.angle_step
             self.points = np.concatenate([self.point, self.points])
-
-            # self.grid[self.point] = 1
-            # rospy.loginfo("Laser:" + str(self.laser[i]))
+        # rospy.loginfo("pontos:" + str(self.points))
+        plt.scatter(self.points[:, 0], self.points[:, 1], c="r")
+        plt.show(block=True)
+        # fig = px.scatter(x=self.points[:, 0], y=self.points[:, 1])
+        # fig.show()
 
     def calc_area(self, msg):
 
@@ -76,5 +77,6 @@ if __name__ == "__main__":
         rospy.init_node("explorer")
         Explorer()
         rospy.spin()
+
     except rospy.ROSInterruptException:
         pass
