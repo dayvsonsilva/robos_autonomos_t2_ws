@@ -4,11 +4,21 @@ import rospy
 
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
+from nav_msgs.msg import Odometry
 import numpy as np
 import matplotlib.pyplot as plt
 import math
 import cmath
+
 import plotly.express as px
+import dash
+from dash.dependencies import Output, Input
+import dash_core_components as dcc
+import dash_html_components as html
+import plotly
+import random
+import plotly.graph_objs as go
+from collections import deque
 
 
 class Explorer:
@@ -31,6 +41,8 @@ class Explorer:
         self.laser_sub = rospy.Subscriber(
             "/front/scan", LaserScan, self.laserCallback, queue_size=10
         )
+        self.odometry_sub = rospy.Subscriber(
+            "/jackal_velocity_controller/odom", Odometry, self.odometryCallback, queue_size=10)
 
     def timerCallback(self, event):
         rospy.loginfo("Timer callback")
@@ -64,6 +76,14 @@ class Explorer:
         plt.show(block=True)
         # fig = px.scatter(x=self.points[:, 0], y=self.points[:, 1])
         # fig.show()
+
+    def odometryCallback(self, msg):
+        rospy.loginfo("Laser callback")
+        self.pose_x = msg.pose.pose.position.x
+        self.pose_y = msg.pose.pose.position.y
+        self.orientation_w = msg.pose.pose.orientation.w
+        rospy.loginfo("pose x: " + str(self.pose_x) + "y: " +
+                      str(self.pose_x) + "w: " + str(self.orientation_w))
 
     def calc_area(self, msg):
 
