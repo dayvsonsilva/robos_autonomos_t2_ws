@@ -90,6 +90,15 @@ source devel/setup.bash
 rosrun explore_and_measure explorer.py
 ```
 
+### Mudar cena do Gazebo
+
+src/jackal_simulator/jackal_gazebo/launch/jackal_world.launch
+```
+  <arg name="world_name" default="$(find jackal_gazebo)/worlds/jackal_race.world" /> 
+  <arg name="world_name" default="$(find jackal_gazebo)/worlds/world1.world" />
+  <arg name="world_name" default="$(find jackal_gazebo)/worlds/world2.world" />
+```
+
 ### Referencias
 
 - [Clearpath](https://www.clearpathrobotics.com/assets/guides/noetic/jackal/simulation.html0)
