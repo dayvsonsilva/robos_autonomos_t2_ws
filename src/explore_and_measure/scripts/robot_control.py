@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 import time
 from math import radians, pi, degrees
 import cmath
-
 import tf
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 import PyKDL
@@ -22,7 +21,6 @@ class RobotControl:
         self.cmd = Twist()
         self.angular_tolerance = radians(2)
         self.rate = rospy.Rate(10)
-
         self.ctrl_c = False
 
         self.publisher_interval = 1.0
