@@ -142,9 +142,9 @@ class RobotControl:
         (position, rotation) = self.get_odom()
         # Set the movement command to a rotation
         if degrees > 0:
-            self.cmd.angular.z = 0.1
+            self.cmd.angular.z = 0.2
         else:
-            self.cmd.angular.z = -0.1
+            self.cmd.angular.z = -0.2
         # Track the last angle measured
         last_angle = rotation
         # Track how far we have turned
