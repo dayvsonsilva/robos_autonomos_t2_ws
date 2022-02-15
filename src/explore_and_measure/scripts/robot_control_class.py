@@ -25,6 +25,7 @@ class RobotControl():
         self.cmd = Twist()
         self.laser_msg = LaserScan()
         self.summit_laser_msg = LaserScan()
+
         self.roll = 0.0
         self.pitch = 0.0
         self.yaw = 0.0

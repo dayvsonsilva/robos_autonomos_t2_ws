@@ -83,7 +83,7 @@ class ProcessData:
     def align_in_map(self, points, x, y, psir):
         # angulo_offset = 134.99974079476908173
         # mudar referencial do robô para o mundo
-        t1 = self.translacao(-x, -y)
+        t1 = self.translacao(x, y)
         r1 = self.rotation(psir)
         m1 = np.dot(r1, t1)
         m1_inv = np.linalg.inv(m1)
@@ -104,7 +104,7 @@ class ProcessData:
         m4 = np.dot(t4, r4)
         p4 = np.dot(m4, points)
 
-        return p1  # point_cloud
+        return p1 # point_cloud
 
     def change_world2cam(M, point_world):
         M_inv = np.linalg.inv(M)
@@ -130,9 +130,9 @@ for i in range(0, 2, 1):
     xp, yp, orient = robot.get_pose()  # verifico pose x(m), y(m), w(degrees)
     # converto em nuvem de pontos
     nuvem = robotpd.point_cloud(
-        laser,  x_anterior-xp, y_anterior-yp, orient_anterior-orient)
+        laser, x_anterior-xp, x_anterior-yp, orient_anterior-orient)
 
-    #x_anterior, y_anterior, orient_anterior = xp, yp, orient
+    x_anterior, y_anterior, orient_anterior = xp, yp, orient
 
     # if i % 2 != 0:
     nuvem_final = np.concatenate([nuvem, nuvem_final], axis=1)
@@ -158,7 +158,7 @@ for i in range(0, 2, 1):
     # plt.axis('equal')
     # plt.scatter(nuvem[0, :], nuvem[1, :], c=color[i])
 
-    # # Movimenta Linear
+    # Movimenta Linear
     laser = robot.get_laser()
     while ([laser.ranges[330:390]] > (np.ones([1, 60]))*1).all():  # 44
         # rospy.loginfo("Seguindo em frente...")

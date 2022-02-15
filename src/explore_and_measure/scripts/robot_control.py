@@ -1,43 +1,46 @@
 #! /usr/bin/env python3
 
 import rospy
-
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist, Point, Quaternion
 from nav_msgs.msg import Odometry
-import numpy as np
-import matplotlib.pyplot as plt
-import time
-from math import radians, pi, degrees
-import cmath
 import tf
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 import PyKDL
+from math import radians, pi, degrees
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+import cmath
 
 
 class RobotControl:
     def __init__(self):
         rospy.init_node("explorer")
+        # Definição de mensagens recebidas e enviadas
         self.cmd = Twist()
+        self.odometry_msg = Odometry()
+        self.laser_msg = LaserScan()
+        self.odometry_fil_msg = Odometry()
+        # variaveis
         self.angular_tolerance = radians(2)
         self.rate = rospy.Rate(10)
         self.ctrl_c = False
-
         self.publisher_interval = 1.0
+
         self.tf_listener = tf.TransformListener()
+
         self.vel_pub = rospy.Publisher(
             "/jackal_velocity_controller/cmd_vel", Twist, queue_size=10)
-        # self.timer_pub = rospy.Timer(
-        #     rospy.Duration(self.publisher_interval), self.timerCallback)
-        self.laser_sub = rospy.Subscriber(
-            "/front/scan", LaserScan, self.laserCallback, queue_size=10)
+
         self.odometry_sub = rospy.Subscriber(
             "/jackal_velocity_controller/odom", Odometry, self.odometryCallback, queue_size=10)
+
+        self.laser_sub = rospy.Subscriber(
+            "/front/scan", LaserScan, self.laserCallback, queue_size=10)
+
         self.odometry_sub = rospy.Subscriber(
             "/odometry/filtered", Odometry, self.odometryFilCallback, queue_size=10)
-
-    # def timerCallback(self, event):
-    #     rospy.loginfo("Timer callback")
 
     def laserCallback(self, msg):
         # rospy.loginfo("Laser callback")
@@ -48,11 +51,11 @@ class RobotControl:
         self.odometry_msg = msg
 
     def odometryFilCallback(self, msg):
-        # rospy.loginfo("Odometry callback")
+        # rospy.loginfo("Odometry fill callback")
         self.odometry_fil_msg = msg
 
     def get_laser(self):
-        time.sleep(0.1)
+        time.sleep(1)
         msg = self.laser_msg
         return msg
 
@@ -87,24 +90,19 @@ class RobotControl:
         self.orientation_w = self.quat_to_angle(
             Quaternion(orient_x, orient_y, orient_z, orient_w))
 
-        # _, _, self.orientation_w = euler_from_quaternion(
-        #     [orient_x, orient_y, orient_z, orient_w])
-        # rospy.loginfo("orientation quaternion" + str(self.orientation_w))
-
         self.orientation_w = degrees(self.orientation_w)
         # rospy.loginfo("orientation" + str(self.orientation_w))
 
         # x(m), y(m), w(degrees)
         return self.pose_x, self.pose_y, self.orientation_w
 
-    # def stop_robot(self):
-    #     msg = Twist()
-    #     msg.angular.z = 0.0
-    #     msg.linear.x = 0.0
-    #     self.vel_pub.publish(msg)
-
     def stop_robot(self):
-        #rospy.loginfo("shutdown time! Stop the robot")
+        #rospy.loginfo("Stop robô.")
+        # msg = Twist()
+        # msg.angular.z = 0.0
+        # msg.linear.x = 0.0
+        #rospy.loginfo("Stop robô.")
+        # self.vel_pub.publish(msg)
         self.cmd.linear.x = 0.0
         self.cmd.angular.z = 0.0
         self.publish_once_in_cmd_vel()
@@ -117,16 +115,12 @@ class RobotControl:
         self.publish_once_in_cmd_vel()
 
     def move_straight(self, vel):
-
-        # Initilize velocities
         self.cmd.linear.x = vel
         self.cmd.linear.y = 0
         self.cmd.linear.z = 0
         self.cmd.angular.x = 0
         self.cmd.angular.y = 0
         self.cmd.angular.z = 0
-
-        # Publish the velocity
         self.publish_once_in_cmd_vel()
 
     def angular_moviment(self, vel):
@@ -135,14 +129,14 @@ class RobotControl:
         msg.linear.x = 0.0
         self.vel_pub.publish(msg)
 
-    def rotate(self, degrees):
+    def rotate(self, degrees):  # remover
         position = Point()
         (position, rotation) = self.get_odom()
         # Set the movement command to a rotation
         if degrees > 0:
-            self.cmd.angular.z = 0.2
+            self.cmd.angular.z = 0.3
         else:
-            self.cmd.angular.z = -0.2
+            self.cmd.angular.z = -0.3
         # Track the last angle measured
         last_angle = rotation
         # Track how far we have turned
@@ -199,11 +193,9 @@ class RobotControl:
 
 
 if __name__ == "__main__":
-
     try:
         rospy.init_node("explorer")
         RobotControl()
         rospy.spin()
-
     except rospy.ROSInterruptException:
         pass

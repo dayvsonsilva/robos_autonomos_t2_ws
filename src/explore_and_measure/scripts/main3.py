@@ -132,50 +132,13 @@ for i in range(0, 2, 1):
     nuvem = robotpd.point_cloud(
         laser,  x_anterior-xp, y_anterior-yp, orient_anterior-orient)
 
-    #x_anterior, y_anterior, orient_anterior = xp, yp, orient
+    x_anterior, y_anterior, orient_anterior = xp, yp, orient
 
     # if i % 2 != 0:
     nuvem_final = np.concatenate([nuvem, nuvem_final], axis=1)
     plt.axis('equal')
     plt.scatter(nuvem[0, :], nuvem[1, :], c=color[i])
-    # Captura laser n i
-    # laser_data = robot.get_laser()  # Lê laser
-    # xp, yp, orient = robot.get_pose()  # Lẽ pose atual x(m), y(m), w(degrees)
-
-    # nuvem_ind = robotpd.laser_pol_to_rect(laser_data)
-
-    # # nuvem = robotpd.point_cloud(laser_data, xp, yp,  orient)
-    # rospy.loginfo("antes da função point cloud")
-    # nuvem = robotpd.point_cloud(
-    #     nuvem_ind, xp - x_inicial, yp - y_inicial,  orient_inicial-orient_inicial)
-    # # nuvem = robotpd.point_cloud(
-    # #     xp - x_inicial, yp - y_inicial,  orient_inicial-orient_inicial)
-    # rospy.loginfo("depois da função")
-
-    # # x_inicial, y_inicial, orient_inicial = xp, yp, orient
-    # # if i % 2 != 0:
-    # nuvem_final = np.concatenate([nuvem, nuvem_final], axis=1)
-    # plt.axis('equal')
-    # plt.scatter(nuvem[0, :], nuvem[1, :], c=color[i])
-
-    # # Movimenta Linear
-    laser = robot.get_laser()
-    while ([laser.ranges[330:390]] > (np.ones([1, 60]))*1).all():  # 44
-        # rospy.loginfo("Seguindo em frente...")
-        # robot.linar_moviment(0.5)
-        robot.move_straight(0.2)
-        laser = robot.get_laser()
-        # time.sleep(1)
-    robot.stop_robot()
-
-    # laser = robot.get_laser()
-    # while ([laser.ranges[330:390]] < (np.ones([1, 60]))*1.2).all():  # 44
-    #     # rospy.loginfo("Seguindo em ré...")
-    #     # robot.linar_moviment(0.5)
-    #     robot.move_straight(-0.2)
-    #     laser = robot.get_laser()
-    #     # time.sleep(1)
-
+  
     # robot.stop_robot()
 
     # Rotação
