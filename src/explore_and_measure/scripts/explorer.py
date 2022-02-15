@@ -10,15 +10,15 @@ import matplotlib.pyplot as plt
 import math
 import cmath
 
-import plotly.express as px
-import dash
-from dash.dependencies import Output, Input
-import dash_core_components as dcc
-import dash_html_components as html
-import plotly
-import random
-import plotly.graph_objs as go
-from collections import deque
+# import plotly.express as px
+# import dash
+# from dash.dependencies import Output, Input
+# import dash_core_components as dcc
+# import dash_html_components as html
+# import plotly
+# import random
+# import plotly.graph_objs as go
+# from collections import deque
 
 
 class Explorer:
@@ -29,9 +29,7 @@ class Explorer:
         self.origin = [len(self.grid[0]) / 2, len(self.grid[1]) / 2]
         # self.origin = [0, 0]
         rospy.loginfo("Origen do mapa:" + str(self.origin))
-
         self.publisher_interval = 1.0
-
         self.vel_pub = rospy.Publisher(
             "/jackal_velocity_controller/cmd_vel", Twist, queue_size=10
         )
@@ -57,6 +55,7 @@ class Explorer:
 
     def laserCallback(self, msg):
         rospy.loginfo("Laser callback")
+        self.laser_msg = msg
         # rospy.loginfo("Resposta laser: " + str(msg.angle_increment))
         self.laser = msg.ranges
         self.angle_step = math.degrees(msg.angle_increment) / 57.2958
@@ -78,18 +77,49 @@ class Explorer:
         # fig.show()
 
     def odometryCallback(self, msg):
-        rospy.loginfo("Laser callback")
+        self.odometry_msg = msg
+        self.odometry_msg_pose = pose.pose.position
+        self.odometry_msg_orientation = pose.pose.orientation
+        rospy.loginfo("odometry callback")
+        self.pose_msg = msg
         self.pose_x = msg.pose.pose.position.x
         self.pose_y = msg.pose.pose.position.y
         self.orientation_w = msg.pose.pose.orientation.w
-        rospy.loginfo("pose x: " + str(self.pose_x) + "y: " +
-                      str(self.pose_x) + "w: " + str(self.orientation_w))
+        # rospy.loginfo("pose x: " + str(self.pose_x) + "y: " +
+        #               str(self.pose_x) + "w: " + str(self.orientation_w))
 
     def calc_area(self, msg):
-
         self.laser = msg.intensities
         self.angle = msg.angle_increment
         print(type(self.laser))
+
+    def move_robot_linear(self, vel):
+        msg = Twist()
+        msg.angular.x = 0.0
+        msg.angular.y = 0.0
+        msg.angular.z = 0.0
+        msg.linear.x = 0.0
+        msg.linear.x = 0.0
+        msg.linear.x = vel
+        self.vel_pub.publish(msg)
+
+    # def rotote_robot(self, degrees):
+        # verifica ponto atual
+
+    def stop_robot(self):
+        msg = Twist()
+        msg.angular.z = 0.0
+        msg.linear.x = 0.0
+        self.vel_pub.publish(msg)
+
+    rospy.loginfo("loop?")
+
+    # Passos para calcular area mundo 1
+    # 1 - lê laser
+    # 2 - Atualiza point map
+    # 3 - Calcula area
+    # 4 - Movimenta robo(gira 180°(1pi))
+    #
 
 
 if __name__ == "__main__":

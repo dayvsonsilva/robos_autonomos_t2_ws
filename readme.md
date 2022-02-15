@@ -67,6 +67,7 @@ Terminal 1
 cd robos_autonomos_t2_ws/
 source devel/setup.bash
 roslaunch jackal_gazebo jackal_world.launch config:=front_laser
+
 ```
 
 Terminal 2
@@ -87,7 +88,7 @@ Terminal 4
 ```
 cd robos_autonomos_t2_ws/
 source devel/setup.bash
-rosrun explore_and_measure explorer.py
+rosrun explore_and_measure main.py
 ```
 
 ### Mudar cena do Gazebo
@@ -106,4 +107,4 @@ src/jackal_simulator/jackal_gazebo/launch/jackal_world.launch
 - [LaserScan msg](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/LaserScan.html) 
 - []()
 - []()
-- []()
+- [ConvexHull](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.ConvexHull.html)
