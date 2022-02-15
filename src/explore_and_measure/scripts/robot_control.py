@@ -28,17 +28,15 @@ class RobotControl:
         self.ctrl_c = False
         self.publisher_interval = 1.0
 
+        
         self.tf_listener = tf.TransformListener()
-
+        # Pub and sub nodes
         self.vel_pub = rospy.Publisher(
             "/jackal_velocity_controller/cmd_vel", Twist, queue_size=10)
-
         self.odometry_sub = rospy.Subscriber(
             "/jackal_velocity_controller/odom", Odometry, self.odometryCallback, queue_size=10)
-
         self.laser_sub = rospy.Subscriber(
             "/front/scan", LaserScan, self.laserCallback, queue_size=10)
-
         self.odometry_sub = rospy.Subscriber(
             "/odometry/filtered", Odometry, self.odometryFilCallback, queue_size=10)
 
