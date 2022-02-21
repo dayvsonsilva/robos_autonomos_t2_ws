@@ -12,12 +12,25 @@ from scipy.spatial import ConvexHull, convex_hull_plot_2d
 robot = RobotControl()
 rospy.loginfo("Start process...")
 
+###########################################################
+# Classe deprocessamento de dados
+#
+#
+
 
 class ProcessData:
     def __init__(self):
         self.variavel_a = 0
         self.points = np.zeros([1, 2])
+
+    ###########################################################
     # monta nuvem de pontos, converte de polar para retangula(x,y)
+    # Entradas : laser - mensagem recebida do laser
+    #            x, y, orient - pose do robo no momento da
+    #                           leitura do laser
+    #
+    # Saida: Nuvem de ponto referenciados a origem(0,0) do mapa
+    #
 
     def point_cloud(self, laser, x, y, orient):
         msg = laser
@@ -60,12 +73,33 @@ class ProcessData:
 
         return mapa_alinhado
 
+    ###########################################################
+    # Calcula area do ambiente a partir da nuvem de pontos
+    #
+    #
+
     def calc_area(self, point_cloud):
         rospy.loginfo("Shape:" + str(np.shape(point_cloud)))
         hull = ConvexHull(point_cloud)
+
+        plt.plot(point_cloud[:, 0], point_cloud[:, 1], 'o')
+        for simplex in hull.simplices:
+            plt.plot(point_cloud[simplex, 0], point_cloud[simplex, 1], 'k-')
+        plt.plot(point_cloud[hull.vertices, 0],
+                 point_cloud[hull.vertices, 1], 'r--', lw=2)
+        plt.plot(point_cloud[hull.vertices[0], 0],
+                 point_cloud[hull.vertices[0], 1], 'ro')
+        plt.show()
+
         rospy.loginfo("Area calculada:" + str(hull.area))
 
+    ###########################################################
+    # Funções de translação e rotação
+    #
+    #
+
     # translação
+
     def translacao(self, tx, ty):
         matriz_de_translacao = np.array([[1.0, 0.0, tx],
                                          [0.0, 1.0, ty],
@@ -112,119 +146,108 @@ class ProcessData:
         return p_cam
 
 
-robotpd = ProcessData()
+if __name__ == "__main__":
 
+    robotpd = ProcessData()  # Intancia objeto processdata
 
-color = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
-_, _, _ = robot.get_pose()
-laser_data = robot.get_laser()
-# laser_data = robot.get_laser()
-rospy.loginfo("Inicio da exploração")
+    color = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+    _, _, _ = robot.get_pose()
 
-nuvem_final = np.zeros([3, 721])
-x_anterior, y_anterior, orient_anterior = robot.get_pose()  # x(m), y(m), w(degrees)
-
-
-for i in range(0, 2, 1):
-    laser = robot.get_laser()  # Verifico laser
-    xp, yp, orient = robot.get_pose()  # verifico pose x(m), y(m), w(degrees)
-    # converto em nuvem de pontos
-    nuvem = robotpd.point_cloud(
-        laser,  x_anterior-xp, y_anterior-yp, orient_anterior-orient)
-
-    #x_anterior, y_anterior, orient_anterior = xp, yp, orient
-
-    # if i % 2 != 0:
-    nuvem_final = np.concatenate([nuvem, nuvem_final], axis=1)
-    plt.axis('equal')
-    plt.scatter(nuvem[0, :], nuvem[1, :], c=color[i])
-    # Captura laser n i
-    # laser_data = robot.get_laser()  # Lê laser
-    # xp, yp, orient = robot.get_pose()  # Lẽ pose atual x(m), y(m), w(degrees)
-
-    # nuvem_ind = robotpd.laser_pol_to_rect(laser_data)
-
-    # # nuvem = robotpd.point_cloud(laser_data, xp, yp,  orient)
-    # rospy.loginfo("antes da função point cloud")
-    # nuvem = robotpd.point_cloud(
-    #     nuvem_ind, xp - x_inicial, yp - y_inicial,  orient_inicial-orient_inicial)
-    # # nuvem = robotpd.point_cloud(
-    # #     xp - x_inicial, yp - y_inicial,  orient_inicial-orient_inicial)
-    # rospy.loginfo("depois da função")
-
-    # # x_inicial, y_inicial, orient_inicial = xp, yp, orient
-    # # if i % 2 != 0:
-    # nuvem_final = np.concatenate([nuvem, nuvem_final], axis=1)
-    # plt.axis('equal')
-    # plt.scatter(nuvem[0, :], nuvem[1, :], c=color[i])
-
-    # # Movimenta Linear
-    # laser = robot.get_laser()
-    # while ([laser.ranges[330:390]] > (np.ones([1, 60]))*1).all():  # 44
-    #     # rospy.loginfo("Seguindo em frente...")
-    #     # robot.linar_moviment(0.5)
-    #     robot.move_straight(0.2)
-    #     laser = robot.get_laser()
-    #     # time.sleep(1)
-    # robot.stop_robot()
-
-    # laser = robot.get_laser()
-    # while ([laser.ranges[330:390]] < (np.ones([1, 60]))*1.2).all():  # 44
-    #     # rospy.loginfo("Seguindo em ré...")
-    #     # robot.linar_moviment(0.5)
-    #     robot.move_straight(-0.2)
-    #     laser = robot.get_laser()
-    #     # time.sleep(1)
-
-    # robot.stop_robot()
-
-    # Rotação
     laser_data = robot.get_laser()
-    if laser_data.ranges[119] < laser_data.ranges[599]:
-        rospy.loginfo("Virando a esquerda... ")
-        robot.rotate(90)
-        # time.sleep(1)
-    elif laser_data.ranges[599] < laser_data.ranges[119]:
-        rospy.loginfo("Virando a direita... ")
-        robot.rotate(-90)
-    time.sleep(1)
+    rospy.loginfo("Inicio da exploração")
 
-    # # # Rotação
-    # if laser_data.ranges[119] > laser_data.ranges[599]:
-    #     robot.rotate(-90)
-    #     time.sleep(1)
-    # elif laser_data.ranges[599] > laser_data.ranges[119]:
-    #     robot.rotate(90)
-    #     time.sleep(1)
-    # robot.rotate(90)
-    time.sleep(2)
+    nuvem_final = np.zeros([3, 721])
+    # Realiza primeira captura da nuvem de pontos
+    x_anterior, y_anterior, orient_anterior = robot.get_pose()  # x(m), y(m), w(degrees)
 
-    # laser = robot.get_laser()
-    # while laser.ranges[360] > 1:
-    #     robot.linar_moviment(0.2)
-    #     laser = robot.get_laser()
-    # time.sleep(1)
-    # while laser.ranges[719] > 1:
-    #     robot.angular_moviment(0.1)
-    #     laser = robot.get_laser()
-    # time.sleep(1)
-    # robot.rotate(90)
-    # robot.stop_robot()
+    ###########################################################
+    # Loop contendo função de captura de dados do laser, alinhamento
+    # e movimentação do robô
+    #
 
-robotpd.calc_area(np.transpose([nuvem_final[0, :], nuvem_final[1, :]]))
+    for i in range(0, 2, 1):
+        ###########################################################
+        # Captura e alinhamento da imagem
+        #
+        #
+        laser = robot.get_laser()  # Verifico laser
+        xp, yp, orient = robot.get_pose()  # verifico pose x(m), y(m), w(degrees)
+        
+        # converto laser em nuvem de pontos
+        nuvem = robotpd.point_cloud(
+            laser,  x_anterior-xp, y_anterior-yp, orient_anterior-orient)
+        
 
-plt.show()
-plt.axis('equal')
-plt.scatter(nuvem_final[0, :], nuvem_final[1, :], c=color[6])
-plt.show()
+        nuvem_final = np.concatenate([nuvem, nuvem_final], axis=1)
+        plt.axis('equal')
+        plt.scatter(nuvem[0, :], nuvem[1, :], c=color[i])
 
-# PENDENCIAS###################################################
-# converter nuvem_final em polar(raio e theta)
-# Criar função para gerar triangulos entre o ponto (0,0) e as extremidades do laser
-# Calcular a soma de todos os triangulos gerados
-# apresentar como ros info area em m²
-# PENDENCIAS###################################################
+        ###########################################################
+        # Movimentação do robô
+        #
+        #
+        # Rotação
+        laser_data = robot.get_laser()
+        if laser_data.ranges[119] < laser_data.ranges[599]:
+            rospy.loginfo("Virando a esquerda... ")
+            robot.rotate(90)
+            # time.sleep(1)
+        elif laser_data.ranges[599] < laser_data.ranges[119]:
+            rospy.loginfo("Virando a direita... ")
+            robot.rotate(-90)
+        time.sleep(1)
+        robot.stop_robot()
+    plt.show()
+    robotpd.calc_area(np.transpose([nuvem_final[0, :], nuvem_final[1, :]]))
+
+    plt.show()
+    plt.axis('equal')
+    plt.scatter(nuvem_final[0, :], nuvem_final[1, :], c=color[6])
+    plt.show()
+
+    # PENDENCIAS###################################################
+    # converter nuvem_final em polar(raio e theta)
+    # Criar função para gerar triangulos entre o ponto (0,0) e as extremidades do laser
+    # Calcular a soma de todos os triangulos gerados
+    # apresentar como ros info area em m²
+    # PENDENCIAS###################################################
+
+    # # rospy.loginfo("Main callback")
+    rospy.loginfo("END")
 
 
-# # rospy.loginfo("Main callback")
-rospy.loginfo("END")
+#########################################################
+# Exemplos de acionamentos
+#
+#
+
+# Rotação
+# laser_data = robot.get_laser()
+# if laser_data.ranges[119] < laser_data.ranges[599]:
+#     rospy.loginfo("Virando a esquerda... ")
+#     robot.rotate(90)
+#     # time.sleep(1)
+# elif laser_data.ranges[599] < laser_data.ranges[119]:
+#     rospy.loginfo("Virando a direita... ")
+#     robot.rotate(-90)
+# time.sleep(1)
+
+# # Movimenta Linear
+# laser = robot.get_laser()
+# while ([laser.ranges[330:390]] > (np.ones([1, 60]))*1).all():  # 44
+#     # rospy.loginfo("Seguindo em frente...")
+#     # robot.linar_moviment(0.5)
+#     robot.move_straight(0.2)
+#     laser = robot.get_laser()
+#     # time.sleep(1)
+# robot.stop_robot()
+
+# laser = robot.get_laser()
+# while ([laser.ranges[330:390]] < (np.ones([1, 60]))*1.2).all():  # 44
+#     # rospy.loginfo("Seguindo em ré...")
+#     # robot.linar_moviment(0.5)
+#     robot.move_straight(-0.2)
+#     laser = robot.get_laser()
+#     # time.sleep(1)
+
+# robot.stop_robot()

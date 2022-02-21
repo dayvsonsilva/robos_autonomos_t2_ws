@@ -17,32 +17,74 @@ import cmath
 class RobotControl:
     def __init__(self):
         rospy.init_node("explorer")
-        # Definição de mensagens recebidas e enviadas
-        self.cmd = Twist()
-        self.odometry_msg = Odometry()
+
+        ###########################################################
+        # TF
+        #
+        #
+        self.tf_listener = tf.TransformListener()
+
+        ###########################################################
+        # laser range finder
+        #
+        #
         self.laser_msg = LaserScan()
-        self.odometry_fil_msg = Odometry()
-        # variaveis
+        self.laser_sub = rospy.Subscriber(
+            "/front/scan", LaserScan, self.laserCallback, queue_size=10)
+
+        ###########################################################
+        # Acionamento do robô
+        #
+        #
+        self.cmd = Twist()
         self.angular_tolerance = radians(2)
         self.rate = rospy.Rate(10)
         self.ctrl_c = False
-        self.publisher_interval = 1.0
-
-        
-        self.tf_listener = tf.TransformListener()
-        # Pub and sub nodes
         self.vel_pub = rospy.Publisher(
             "/jackal_velocity_controller/cmd_vel", Twist, queue_size=10)
+
+        ###########################################################
+        # Odometria
+        #
+        #
+
+        self.odometry_msg = Odometry()
+        self.odometry_fil_msg = Odometry()
         self.odometry_sub = rospy.Subscriber(
             "/jackal_velocity_controller/odom", Odometry, self.odometryCallback, queue_size=10)
-        self.laser_sub = rospy.Subscriber(
-            "/front/scan", LaserScan, self.laserCallback, queue_size=10)
         self.odometry_sub = rospy.Subscriber(
             "/odometry/filtered", Odometry, self.odometryFilCallback, queue_size=10)
+
+        ###########################################################
+        # Acionamento do robô
+        #
+        #
+        self.cmd = Twist()
+        self.angular_tolerance = radians(2)
+        self.rate = rospy.Rate(10)
+        self.ctrl_c = False
+        self.vel_pub = rospy.Publisher(
+            "/jackal_velocity_controller/cmd_vel", Twist, queue_size=10)
+
+    ###########################################################
+    # laser range finder- funções
+    #
+    #
 
     def laserCallback(self, msg):
         # rospy.loginfo("Laser callback")
         self.laser_msg = msg
+
+        # funçoes gerais Laser
+    def get_laser(self):
+        time.sleep(1)
+        msg = self.laser_msg
+        return msg
+
+    ###########################################################
+    # Odometria - funções
+    #
+    #
 
     def odometryCallback(self, msg):
         # rospy.loginfo("Odometry callback")
@@ -51,27 +93,6 @@ class RobotControl:
     def odometryFilCallback(self, msg):
         # rospy.loginfo("Odometry fill callback")
         self.odometry_fil_msg = msg
-
-    def get_laser(self):
-        time.sleep(1)
-        msg = self.laser_msg
-        return msg
-
-    def publish_once_in_cmd_vel(self):
-        while not self.ctrl_c:
-            connections = self.vel_pub.get_num_connections()
-            # summit_connections = self.summit_vel_publisher.get_num_connections()
-            if connections > 0:
-                self.vel_pub.publish(self.cmd)
-                # self.summit_vel_publisher.publish(self.cmd)
-                #rospy.loginfo("Cmd Published")
-                break
-            else:
-                self.rate.sleep()
-
-    def shutdownhook(self):
-        # works better than the rospy.is_shutdown()
-        self.ctrl_c = True
 
     # retorna x(m), y(m) e w(degress)
     def get_pose(self):
@@ -93,6 +114,46 @@ class RobotControl:
 
         # x(m), y(m), w(degrees)
         return self.pose_x, self.pose_y, self.orientation_w
+
+    def get_odom(self):
+        # Get the current transform between the odom and base frames
+        tf_ok = 0
+        while tf_ok == 0 and not rospy.is_shutdown():
+            try:
+                self.tf_listener.waitForTransform(
+                    '/base_link', '/odom', rospy.Time(), rospy.Duration(1.0))
+                tf_ok = 1
+            except (tf.Exception, tf.ConnectivityException, tf.LookupException):
+                pass
+
+        try:
+            (trans, rot) = self.tf_listener.lookupTransform(
+                'odom', 'base_link', rospy.Time(0))
+        except (tf.Exception, tf.ConnectivityException, tf.LookupException):
+            rospy.loginfo("TF Exception")
+            return
+
+        return (Point(*trans), self.quat_to_angle(Quaternion(*rot)))
+
+    def quat_to_angle(self, quat):
+        rot = PyKDL.Rotation.Quaternion(quat.x, quat.y, quat.z, quat.w)
+        return rot.GetRPY()[2]
+    ###########################################################
+    # Acionamento do robô funções
+    #
+    #
+
+    def publish_once_in_cmd_vel(self):
+        while not self.ctrl_c:
+            connections = self.vel_pub.get_num_connections()
+            # summit_connections = self.summit_vel_publisher.get_num_connections()
+            if connections > 0:
+                self.vel_pub.publish(self.cmd)
+                # self.summit_vel_publisher.publish(self.cmd)
+                #rospy.loginfo("Cmd Published")
+                break
+            else:
+                self.rate.sleep()
 
     def stop_robot(self):
         #rospy.loginfo("Stop robô.")
@@ -157,30 +218,6 @@ class RobotControl:
 
         self.stop_robot()
 
-    def get_odom(self):
-        # Get the current transform between the odom and base frames
-        tf_ok = 0
-        while tf_ok == 0 and not rospy.is_shutdown():
-            try:
-                self.tf_listener.waitForTransform(
-                    '/base_link', '/odom', rospy.Time(), rospy.Duration(1.0))
-                tf_ok = 1
-            except (tf.Exception, tf.ConnectivityException, tf.LookupException):
-                pass
-
-        try:
-            (trans, rot) = self.tf_listener.lookupTransform(
-                'odom', 'base_link', rospy.Time(0))
-        except (tf.Exception, tf.ConnectivityException, tf.LookupException):
-            rospy.loginfo("TF Exception")
-            return
-
-        return (Point(*trans), self.quat_to_angle(Quaternion(*rot)))
-
-    def quat_to_angle(self, quat):
-        rot = PyKDL.Rotation.Quaternion(quat.x, quat.y, quat.z, quat.w)
-        return rot.GetRPY()[2]
-
     def normalize_angle(self, angle):
         res = angle
         while res > pi:
@@ -189,7 +226,12 @@ class RobotControl:
             res += 2.0 * pi
         return res
 
+    def shutdownhook(self):
+        # works better than the rospy.is_shutdown()
+        self.ctrl_c = True
 
+
+####################################################################
 if __name__ == "__main__":
     try:
         rospy.init_node("explorer")
@@ -197,3 +239,6 @@ if __name__ == "__main__":
         rospy.spin()
     except rospy.ROSInterruptException:
         pass
+
+
+####################################################################
