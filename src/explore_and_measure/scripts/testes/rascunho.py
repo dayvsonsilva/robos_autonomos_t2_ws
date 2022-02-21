@@ -10,9 +10,9 @@ def Frame_Transform_Point(self, x, y, source, target,position):
         posestamp.pose.orientation.w = quart[3]
         posestamp.pose.position.x = x
        
- try:
-            reply = self.tf_listener.transformPose(target, posestamp)
-        except (tf.LookupException, tf.ConnectivityException,
-                tf.ExtrapolationException):
-            rospy.loginfo("Error on Frame Transformation...")
-        return reply.pose.position.x, reply.pose.position.y
+try:
+    reply = self.tf_listener.transformPose(target, posestamp)
+except (tf.LookupException, tf.ConnectivityException,
+        tf.ExtrapolationException):
+        rospy.loginfo("Error on Frame Transformation...")
+    return reply.pose.position.x, reply.pose.position.y

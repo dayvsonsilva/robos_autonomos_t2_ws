@@ -1,1 +1,7 @@
-<launch></launch>
+<launch>
+
+    <include file="$(find jackal_gazebo)/launch/jackal_world.launch" />
+    <node pkg="explore_and_measure" type="main.py" name="explore" output="screen" />
+
+
+</launch>

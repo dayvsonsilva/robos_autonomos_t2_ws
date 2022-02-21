@@ -5,7 +5,7 @@ import cmath
 import numpy as np
 import time
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
-from robot_control import RobotControl
+from control import RobotControl
 import matplotlib.pyplot as plt
 from scipy.spatial import ConvexHull, convex_hull_plot_2d
 
@@ -159,14 +159,14 @@ for i in range(0, 2, 1):
     # plt.scatter(nuvem[0, :], nuvem[1, :], c=color[i])
 
     # # Movimenta Linear
-    # laser = robot.get_laser()
-    # while ([laser.ranges[330:390]] > (np.ones([1, 60]))*1).all():  # 44
-    #     # rospy.loginfo("Seguindo em frente...")
-    #     # robot.linar_moviment(0.5)
-    #     robot.move_straight(0.2)
-    #     laser = robot.get_laser()
-    #     # time.sleep(1)
-    # robot.stop_robot()
+    laser = robot.get_laser()
+    while ([laser.ranges[330:390]] > (np.ones([1, 60]))*1).all():  # 44
+        # rospy.loginfo("Seguindo em frente...")
+        # robot.linar_moviment(0.5)
+        robot.move_straight(0.2)
+        laser = robot.get_laser()
+        # time.sleep(1)
+    robot.stop_robot()
 
     # laser = robot.get_laser()
     # while ([laser.ranges[330:390]] < (np.ones([1, 60]))*1.2).all():  # 44

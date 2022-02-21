@@ -1,5 +1,4 @@
-### Passos de intalação
-    
+### Passos de intalação  
 
 ```shell
 mkdir robos_autonomos_t2_ws/src
@@ -109,3 +108,16 @@ src/jackal_simulator/jackal_gazebo/launch/jackal_world.launch
 - []()
 - []()
 - [ConvexHull](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.ConvexHull.html)
+- 
+- 
+
+
+
+### Rascunho
+
+   <node pkg="explore_and_measure" type="main.py"
+          name="explore" />
+
+### Referencias estudos
+
+https://github.com/ros/geometry_tutorials
