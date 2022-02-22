@@ -5,6 +5,8 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist, Point, Quaternion
 from nav_msgs.msg import Odometry
 import tf
+import tf2_ros
+
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 import PyKDL
 from math import radians, pi, degrees
@@ -22,7 +24,8 @@ class RobotControl:
         # TF
         #
         #
-        self.tf_listener = tf.TransformListener()
+        self.tfBuffer = tf2_ros.Buffer()
+        self.tf_listener = tf.TransformListener(self.tfBuffer)
 
         ###########################################################
         # laser range finder
@@ -66,6 +69,14 @@ class RobotControl:
         self.vel_pub = rospy.Publisher(
             "/jackal_velocity_controller/cmd_vel", Twist, queue_size=10)
 
+    ###########################################################
+    # TF
+    #
+    #
+
+    def get_tf(self):
+        msg = self.tfBuffer
+        return msg
     ###########################################################
     # laser range finder- funções
     #

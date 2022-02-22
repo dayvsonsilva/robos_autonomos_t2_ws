@@ -9,6 +9,7 @@ from robot_control import RobotControl
 import matplotlib.pyplot as plt
 from scipy.spatial import ConvexHull, convex_hull_plot_2d
 
+
 robot = RobotControl()
 rospy.loginfo("Start process...")
 
@@ -59,10 +60,10 @@ class ProcessData:
         rospy.loginfo("Angulo na captura: " + str(self.ow))
         rospy.loginfo("")
 
-        textepose, testeorie = robot.get_odom()
-        rospy.loginfo("textepose: " + str(textepose))
-        rospy.loginfo("testeorie: " + str(degrees(testeorie)))
-        rospy.loginfo("")
+        # textepose, testeorie = robot.get_odom()
+        # rospy.loginfo("textepose: " + str(textepose))
+        # rospy.loginfo("testeorie: " + str(degrees(testeorie)))
+        # rospy.loginfo("")
 
         nuvem = [self.points[:, 0], self.points[:, 1]]
         matriz = [self.points[:, 0], self.points[:, 1],
@@ -80,18 +81,21 @@ class ProcessData:
 
     def calc_area(self, point_cloud):
         rospy.loginfo("Shape:" + str(np.shape(point_cloud)))
-        hull = ConvexHull(point_cloud)
+        hull = ConvexHull(point_cloud, qhull_options='qt')
 
         plt.plot(point_cloud[:, 0], point_cloud[:, 1], 'o')
         for simplex in hull.simplices:
             plt.plot(point_cloud[simplex, 0], point_cloud[simplex, 1], 'k-')
+
         plt.plot(point_cloud[hull.vertices, 0],
                  point_cloud[hull.vertices, 1], 'r--', lw=2)
+
         plt.plot(point_cloud[hull.vertices[0], 0],
                  point_cloud[hull.vertices[0], 1], 'ro')
+        plt.axis('equal')
         plt.show()
 
-        rospy.loginfo("Area calculada:" + str(hull.area))
+        rospy.loginfo("Area calculada: " + str(round(hull.area, 2)))
 
     ###########################################################
     # Funções de translação e rotação
@@ -170,13 +174,19 @@ if __name__ == "__main__":
         # Captura e alinhamento da imagem
         #
         #
+
         laser = robot.get_laser()  # Verifico laser
         xp, yp, orient = robot.get_pose()  # verifico pose x(m), y(m), w(degrees)
-        
+
+        ##########################################################################################
+        tf_data = robot.get_tf()
+        # trans = tf_data.lookup_transform('odom', 'base_link', rospy.Time())
+
+        ##########################################################################################
+
         # converto laser em nuvem de pontos
         nuvem = robotpd.point_cloud(
             laser,  x_anterior-xp, y_anterior-yp, orient_anterior-orient)
-        
 
         nuvem_final = np.concatenate([nuvem, nuvem_final], axis=1)
         plt.axis('equal')
@@ -197,6 +207,8 @@ if __name__ == "__main__":
             robot.rotate(-90)
         time.sleep(1)
         robot.stop_robot()
+
+    plt.axis('equal')
     plt.show()
     robotpd.calc_area(np.transpose([nuvem_final[0, :], nuvem_final[1, :]]))
 

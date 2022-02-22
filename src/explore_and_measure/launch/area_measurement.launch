@@ -1,7 +1,14 @@
 <launch>
 
-    <include file="$(find jackal_gazebo)/launch/jackal_world.launch" />
-    <node pkg="explore_and_measure" type="main.py" name="explore" output="screen" />
+    <arg name="world" default="world1" />
 
+    <include file="$(find jackal_gazebo)/launch/jackal_world.launch">
+        <arg name="world" value="$(arg world)" />
+        <arg name="config" value="front_laser" />
 
+    </include>
+
+    <arg name="node_start_delay" default="20.0" />
+    <node pkg="explore_and_measure" type="main.py" name="explore" output="screen" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' " />
+    />
 </launch>

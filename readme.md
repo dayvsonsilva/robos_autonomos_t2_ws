@@ -66,7 +66,7 @@ Terminal 1
 ```
 cd robos_autonomos_t2_ws/
 source devel/setup.bash
-roslaunch jackal_gazebo jackal_world.launch config:=front_laser
+roslaunch jackal_gazebo jackal_world.launch config:=front_laser world:=world1
 
 ```
 
@@ -90,6 +90,18 @@ cd robos_autonomos_t2_ws/
 source devel/setup.bash
 rosrun explore_and_measure main.py
 ```
+
+
+terminal unico
+```
+cd robos_autonomos_t2_ws/
+source devel/setup.bash
+roslaunch explore_and_measure area_measurement.launch world:=world2
+```
+
+
+
+
 
 ### Mudar cena do Gazebo
 
