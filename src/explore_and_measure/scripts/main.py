@@ -191,6 +191,7 @@ if __name__ == "__main__":
         nuvem_final = np.concatenate([nuvem, nuvem_final], axis=1)
         plt.axis('equal')
         plt.scatter(nuvem[0, :], nuvem[1, :], c=color[i])
+        plt.show()
 
         ###########################################################
         # Movimentação do robô

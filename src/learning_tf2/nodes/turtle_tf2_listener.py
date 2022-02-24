@@ -23,9 +23,22 @@ if __name__ == '__main__':
     rate = rospy.Rate(10.0)
     while not rospy.is_shutdown():
         try:
-            trans = tfBuffer.lookup_transform(
-                turtle_name, 'turtle1', rospy.Time())
+            # past = rospy.Time.now() - rospy.Duration(5.0)
+            # trans = tfBuffer.lookup_transform(turtle_name,
+            #                                   'carrot1',
+            #                                   past,
+            #                                   rospy.Duration(1.0))
+            past = rospy.Time.now() - rospy.Duration(5.0)
+            trans = tfBuffer.lookup_transform_full(
+                target_frame=turtle_name,
+                target_time=rospy.Time.now(),
+                source_frame='carrot1',
+                source_time=past,
+                fixed_frame='world',
+                timeout=rospy.Duration(1.0)
+            )
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            raise
             rate.sleep()
             continue
 

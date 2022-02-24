@@ -34,10 +34,11 @@ git clone https://github.com/jackal/jackal_simulator.git
 ```
 https://github.com/ros-visualization/interactive_marker_twist_server.git
 ```
-
+Instalar dependências
+```
 $rosdep install --from-paths src --ignore-src -r -y
-
-### testar comandos
+```
+Resumo dos comandos
 
 ```
 mkdir rat2_ws
@@ -99,18 +100,6 @@ source devel/setup.bash
 roslaunch explore_and_measure area_measurement.launch world:=world2
 ```
 
-
-
-
-
-### Mudar cena do Gazebo
-
-src/jackal_simulator/jackal_gazebo/launch/jackal_world.launch
-```
-  <arg name="world_name" default="$(find jackal_gazebo)/worlds/jackal_race.world" /> 
-  <arg name="world_name" default="$(find jackal_gazebo)/worlds/world1.world" />
-  <arg name="world_name" default="$(find jackal_gazebo)/worlds/world2.world" />
-```
 
 ### Referencias
 
