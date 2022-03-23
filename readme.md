@@ -106,12 +106,7 @@ roslaunch explore_and_measure area_measurement.launch world:=world2
 - [Clearpath](https://www.clearpathrobotics.com/assets/guides/noetic/jackal/simulation.html0)
 - [dinvincible98](https://github.com/dinvincible98/Jackal_ROS_Noetic_Bringup)
 - [LaserScan msg](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/LaserScan.html) 
-- []()
-- []()
 - [ConvexHull](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.ConvexHull.html)
-- 
-- 
-
 
 
 ### Rascunho
