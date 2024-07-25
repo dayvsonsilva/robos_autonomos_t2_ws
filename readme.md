@@ -1,4 +1,4 @@
-### Passos de intalação  
+### Passos de instalação  
 
 ```shell
 mkdir robos_autonomos_t2_ws/src
