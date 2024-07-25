@@ -108,12 +108,6 @@ roslaunch explore_and_measure area_measurement.launch world:=world2
 - [LaserScan msg](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/LaserScan.html) 
 - [ConvexHull](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.ConvexHull.html)
 
-
-### Rascunho
-
-   <node pkg="explore_and_measure" type="main.py"
-          name="explore" />
-
 ### Referencias estudos
 
 https://github.com/ros/geometry_tutorials
